@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block title %}{{title}}{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="/">{{user.short_name}}</a>
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul class="navbar-nav">
+      <li class="nav-item dropdown">
+        <button class="btn dropdown-toggle" type="button" id="wordsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            Preview Words
+        </button>
+        <div class="dropdown-menu" aria-labelledby="wordsDropdown">
+            <a class="dropdown-item" href="/word/words">Word-Meaning</a>
+            <a class="dropdown-item" href="/word/word-details">Word-Meaning-Example</a>
+        </div>
+      </li>
+
+      <li class="nav-item dropdown">
+        <button class="btn dropdown-toggle" type="button" id="difficultyDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            Select Difficulty
+        </button>
+        <div class="dropdown-menu" aria-labelledby="difficultyDropdown">
+            <a class="dropdown-item" href="/word/easy-words">Easy</a>
+            <a class="dropdown-item" href="/word/medium-words">Medium</a>
+            <a class="dropdown-item" href="/word/hard-words">Hard</a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+{% endblock %}
+
+{% block body %}
+    <div>
+        <div class="d-flex">
+            <form method="POST" action="{% url 'add-word' %}" class="form-inline w-100 d-flex justify-content-between">
+                {% csrf_token %}
+                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="word" placeholder="New Word" required>
+                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="pronunciation" placeholder="Pronunciation">
+                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="meaning" placeholder="Meaning" required>
+                <input class="rounded" style="border: 1px solid #a3ada6;" type="text" name="example" placeholder="Example">
+                <select class="rounded" style="border: 1px solid #a3ada6;" name="difficult_level">
+                    {% for item in level %}
+                        <option value="{{ item.id }}">{{ item.text }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm"><i class="bi bi-check-lg"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between flex-wrap mt-3">
+        {% for word in words %}
+        <div class="bg-primary-subtle w-25 d-flex flex-column m-1 rounded-3">
+            <div class="m-2">
+
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <form method="POST" action="{% url 'edit-word' word.id %}" class="d-inline d-flex">
+                            {% csrf_token %}
+                            <div id="inputWordText{{ word.id }}" class="d-none">
+                                <input class="transparent-input fw-bold" style="width: 150px;" type="text" value="{{word.text}}" name="text" required>
+                            </div>
+                            
+                            <span id="spanWordText{{ word.id }}" class="fs-3 fw-bold text-decoration-underline">{{word.text}}</span>
+                            <button id="buttonSubmitWordText{{ word.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
+                            <div class="btn-group-visibility d-flex align-items-center">
+                                <button id="buttonWordText{{ word.id }}" type="button" onclick="editField('buttonWordText{{ word.id }}', 'buttonSubmitWordText{{ word.id }}', 'spanWordText{{ word.id }}', 'inputWordText{{ word.id }}')" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-pencil"></i></button>
+                            </div>
+                        </form>
+                        
+                        <form method="POST" action="{% url 'edit-word' word.id %}" class="d-inline d-flex">
+                            {% csrf_token %}
+                            <div id="inputPronunciation{{ word.id }}" class="d-none">
+                                <input class="transparent-input fw-bold" style="width: 120px;" type="text" value="{{word.pronunciation}}" name="pronunciation" required>
+                            </div>
+                            <span id="spanPronunciation{{ word.id }}" class="fs-6 fw-bold fst-italic">{{word.pronunciation}}</span>
+                            <button id="buttonSubmitPronunciation{{ word.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
+                            <div class="btn-group-visibility d-flex align-items-center">
+                                <button id="buttonPronunciation{{ word.id }}" type="button" onclick="editField('buttonPronunciation{{ word.id }}', 'buttonSubmitPronunciation{{ word.id }}', 'spanPronunciation{{ word.id }}', 'inputPronunciation{{ word.id }}')" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-pencil"></i></button>
+                            </div>
+                        </form>
+                    </div>
+                    <form method="POST" action="{% url 'edit-word' word.id %}" class="d-inline d-flex align-items-center">
+                        {% csrf_token %}
+                        <div class="btn-group-visibility d-flex align-items-center">
+                            <button id="buttonLevel{{ word.id }}" type="button" onclick="editField('buttonLevel{{ word.id }}', 'buttonSubmitLevel{{ word.id }}', 'spanLevel{{ word.id }}', 'inputLevel{{ word.id }}')" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-pencil"></i></button>
+                        </div>
+                        <button id="buttonSubmitLevel{{ word.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
+                        
+                        <div id="inputLevel{{ word.id }}" class="d-none">
+                            <select name="difficult_level" class="transparent-input">
+                                {% for item in level %}
+                                    <option value="{{ item.id }}"
+                                    {% if word.level.id == item.id %}selected{% endif %}
+                                    >{{ item.text }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <span id="spanLevel{{ word.id }}" class="badge bg-success">{{word.level.text}}</span>
+                    </form>
+                </div>
+
+                <div class="rounded-3">
+                    <hr>
+                    {% for meaning in word.meanings %}
+                    <div class="d-flex justify-content-between">
+                        <div class="d-flex">
+                            <div style="min-width: 30px; max-width: 30px;"></div>
+                            
+                            <form method="POST" action="{% url 'edit-word-meaning' meaning.id %}" class="d-inline d-flex">
+                                {% csrf_token %}
+                                <div id="inputMeaning{{ meaning.id }}" class="d-none">
+                                    <input class="transparent-input fw-bold" style="width: 150px;" type="text" value="{{meaning.text}}" name="meaning" required>
+                                </div>
+                                <div id="spanMeaning{{ meaning.id }}" class="d-flex align-items-center">
+                                    <span>&#8226; {{meaning.text}}</span>
+                                </div>
+                                <button id="buttonSubmitMeaning{{ meaning.id }}" class="d-none" type="submit" style="border: none; background-color: transparent; cursor: pointer;"><i class="bi bi-check-lg"></i></button>
+                            </form>
+                        </div>
+                        <div class="btn-group-visibility d-flex align-items-center">
+                            <button id="buttonMeaning{{ meaning.id }}" type="button" onclick="editField('buttonMeaning{{ meaning.id }}', 'buttonSubmitMeaning{{ meaning.id }}', 'spanMeaning{{ meaning.id }}', 'inputMeaning{{ meaning.id }}')" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></button>
+
+                            <form method="POST" action="{% url 'delete-word-meaning' meaning.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-danger" type="submit"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="make-vanish d-flex">
+                        <div style="min-width: 30px; max-width: 30px;"></div>
+                        <form method="POST" action="{% url 'add-word-meaning' word.id %}" class="form-inline w-100 d-flex justify-content-between">
+                            {% csrf_token %}
+                            <input class="transparent-input" type="text" name="meaning" placeholder="New Meaning" required>
+                            <button type="submit" class="btn btn-sm btn-success btn-group-visibility"><i class="bi bi-check-lg"></i></button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="rounded-3">
+                    <div class="d-flex justify-content-end">
+                        <span>{{word.date_time|date}}</span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
