@@ -75,6 +75,32 @@
                 input.className = 'd-flex';
             }
 
+            function uniqueUsernameCheck() {
+                const username = document.getElementById('username').value;
+                if (username != ''){
+                    fetch(`http://127.0.0.1:8000/user/unique-username/${username}/`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.is_exist) {
+                            console.log('Username Exists')
+                            document.getElementById("username").innerHTML = "Already Exist"
+                        }
+                        else {
+                            console.log('Username doesn\'t Exist')
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
+                }
+                
+            }
+
             function twoMinutes(){
                 fetch('http://127.0.0.1:8000/settings/get-settings/')
                 .then(response => {

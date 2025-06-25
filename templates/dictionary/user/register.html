@@ -57,7 +57,7 @@
 
         <!-- Username input -->
         <div class="form-outline mb-3">
-          <input type="text" class="form-control" style="text-transform: lowercase;"  value="{{field.username}}" placeholder="Username" name="username" required/>
+          <input id="username" type="text" class="form-control" style="text-transform: lowercase;"  value="{{field.username}}" placeholder="Username" name="username" oninput="uniqueUsernameCheck()" required/>
           {% if error.username %}
             <span style="color: red;">{{error.username}}</span>
           {% endif %}
